@@ -2,7 +2,6 @@
 pragma solidity ^0.8.17;
 
 //Imports
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IMyCoin} from "../ERC20/IMyCoin.sol";
 import {IMyNFTCollection} from "../ERC721/IMyNFTCollection.sol";
 
@@ -13,7 +12,7 @@ import {IMyNFTCollection} from "../ERC721/IMyNFTCollection.sol";
  * @notice 
  * @dev 
  */
-contract MyMarketPlace is Ownable{
+contract MyMarketPlace {
 
     /**
      * -----------------------------------------------------------------------------------------------------
