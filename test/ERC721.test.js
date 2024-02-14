@@ -10,13 +10,13 @@ describe("MyNFTCollection Test Suite", function () {
         const ERC721Contract = await ethers.getContractFactory("MyNFTCollection")
         deployedERC721Contract = await ERC721Contract.deploy("MyKeepCodingNFT","KCNFT")
         await deployedERC721Contract.waitForDeployment()
-        console.log(deployedERC721Contract.target)
+        // console.log(deployedERC721Contract.target)
     })
 
     it("Get Signers", async function(){
         [signer,otherAccount] = await ethers.getSigners()
-        console.log(signer.address)
-        console.log(otherAccount.address)
+        // console.log(signer.address)
+        // console.log(otherAccount.address)
     })
 
     it("Deployed contract have correct name and symbol", async function () {
