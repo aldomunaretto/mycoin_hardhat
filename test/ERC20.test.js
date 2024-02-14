@@ -10,13 +10,13 @@ describe("ERC20 Test Suite", function(){
         const ERC20Contract = await ethers.getContractFactory("MyCoin")
         deployedERC20Contract = await ERC20Contract.deploy(5000,2)
         await deployedERC20Contract.waitForDeployment()
-        console.log(deployedERC20Contract.target)
+        // console.log(deployedERC20Contract.target)
     })
 
     it("Get Signers", async function(){
         [signer,otherAccount] = await ethers.getSigners()
-        console.log(signer.address)
-        console.log(otherAccount.address)
+        // console.log(signer.address)
+        // console.log(otherAccount.address)
     })
 
     it("Check Balance", async function(){
@@ -28,7 +28,7 @@ describe("ERC20 Test Suite", function(){
     })
 
     it("Check Transfer", async function(){
-        const result = await deployedERC20Contract.doTransfer(otherAccount.address,3000)
+        await deployedERC20Contract.doTransfer(otherAccount.address,3000)
 
         const balance = await deployedERC20Contract.getBalance(signer.address)
         expect(balance).to.equal(2000)
