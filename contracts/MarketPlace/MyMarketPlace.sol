@@ -118,21 +118,76 @@ contract MyMarketPlace is Ownable{
     //Para la resolucion de la practica es necesario utilizar la funcion transferFrom tanto del ERC20 como del ERC721.
     //Porque quien va a realizar las llamadas de transferencia (transferFrom) va a ser el contrato del MarketPlace
     
-    function createSale(uint256 _tokenId, uint256 _price) public{
-        //Ejemplo de uso de los contratos externos
-        // MyNFTCollection.ownerOfToken(_tokenId)
+    // function createSale(uint256 _tokenId, uint256 _price) public{
+    //     //Ejemplo de uso de los contratos externos
+    //     // MyNFTCollection.ownerOfToken(_tokenId)
+    // }
+
+    function createSale(uint256 _tokenId, uint256 _price) public {
+    // Comprobar que el owner del token es quien llama a la función
+    require(MyNFTCollectionContract.ownerOf(_tokenId) == msg.sender, "You are not the owner of the token");
+
+    // Transferir el token ERC721 al contrato MyMarketPlace
+    MyNFTCollectionContract.transferFrom(msg.sender, address(this), _tokenId);
+
+    // Crear una nueva venta
+    Sale memory newSale = Sale({
+        owner: msg.sender,
+        tokenId: _tokenId,
+        price: _price,
+        status: SaleStatus.Open
+    });
+
+    // Incrementar el contador de id de ventas
+    uint256 saleId = incrementCounter();
+
+    // Asignar la nueva venta al mapping de ventas
+    sales[saleId] = newSale;
+}
+
+function buySale(uint256 _saleId) public {
+    // Obtener la venta correspondiente al saleId
+    Sale storage sale = sales[_saleId];
+
+    // Comprobar que el comprador tiene balance suficiente de MyCoin para realizar la compra
+    require(MyCoinContract.balanceOf(msg.sender) >= sale.price, "Insufficient balance");
+
+    // Comprobar que el estado de la venta es Open
+    require(sale.status == SaleStatus.Open, "Sale is not open"); 
+
+    // Transferir los MyCoin desde la address del comprador a la address del vendedor
+    MyCoinContract.transferFrom(msg.sender, sale.owner, sale.price);
+
+    //Transfiere el token ERC721 desde la address de MyMarketPlace al address del comprador
+    MyNFTCollectionContract.transferFrom(address(this), msg.sender, sale.tokenId);
+
+    // Actualizar el estado de la venta a Executed
+    sale.status = SaleStatus.Executed;
+}
+
+    function canceSale(uint256 _saleId) public {
+        // Obtener la venta correspondiente al saleId
+        Sale storage sale = sales[_saleId];
+
+        // Comprobar que el owner del token es quien llama a la función
+        require(sale.owner == msg.sender, "You are not the owner of the sale");
+
+        // Comprobar que el estado de la venta es Open
+        require(sale.status == SaleStatus.Open, "Sale is not open");
+
+        // Transferir el token ERC721 desde el contrato MyMarketPlace al address del propietario
+        MyNFTCollectionContract.transferFrom(address(this), sale.owner, sale.tokenId);
+
+        // Actualizar el estado de la venta a Cancelled
+        sale.status = SaleStatus.Cancelled;
     }
 
-    function buySale(uint256 _saleId) public{
-            
-    }
+    function getSale(uint256 _saleId) public view returns(Sale memory) {
+        // Comprobar que el saleId existe
+        require(_saleId <= saleIdCounter, "Invalid saleId");
 
-    function canceSale(uint256 _saleId) public{
-
-    }
-
-    function getSale(uint256 _saleId) public view returns(Sale memory){
-
+        // Devolver la información de la venta correspondiente al saleId
+        return sales[_saleId];
     }
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 }
