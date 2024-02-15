@@ -60,14 +60,14 @@ contract MyCoin is ERC20,Ownable{
      * -----------------------------------------------------------------------------------------------------
      */
 
-    modifier checkBalance(uint256 _value){
-        uint256 actualBalance = getBalance(msg.sender);
-        if(actualBalance < _value){
-            revert BalanceInsuficiente(msg.sender, _value);
-            require(true, "No tiene saldo suficiente la direccion esta");
-        }
-        _;
-    }
+    // modifier checkBalance(uint256 _value){
+    //     uint256 actualBalance = getBalance(msg.sender);
+    //     if(actualBalance < _value){
+    //         revert BalanceInsuficiente(msg.sender, _value);
+    //         require(true, "No tiene saldo suficiente la direccion esta");
+    //     }
+    //     _;
+    // }
 
     modifier allowTransfers() {
         require(status, "Transfers are not allowed");
