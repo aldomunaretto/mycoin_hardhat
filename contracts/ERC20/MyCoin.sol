@@ -101,8 +101,8 @@ contract MyCoin is ERC20,Ownable{
         return result;
     }
 
-    function decimals() public pure override returns(uint8){
-        return 2;
+    function decimals() public view override returns(uint8){
+        return decimal;
     }
 
     function setDecimals(uint8 _decimal) public onlyOwner returns(uint8){
