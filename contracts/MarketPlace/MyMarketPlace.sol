@@ -145,6 +145,9 @@ contract MyMarketPlace {
 }
 
 function buySale(uint256 _saleId) public {
+    // Verificar que la venta existe
+    require(_saleId > 0 && _saleId <= saleIdCounter, "Invalid saleId");
+    
     // Obtener la venta correspondiente al saleId
     Sale storage sale = sales[_saleId];
 
@@ -165,6 +168,9 @@ function buySale(uint256 _saleId) public {
 }
 
     function canceSale(uint256 _saleId) public {
+        // Verificar que la venta existe
+        require(_saleId > 0 && _saleId <= saleIdCounter, "Invalid saleId");
+
         // Obtener la venta correspondiente al saleId
         Sale storage sale = sales[_saleId];
 

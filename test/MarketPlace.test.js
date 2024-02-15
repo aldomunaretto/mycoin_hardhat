@@ -218,6 +218,14 @@ describe("MyMarketPlace Test Suite", function () {
         expect(sale[3]).to.equal(2)
     });
 
+    it("buySale fails if saleId does not exist", async function() {
+        expect(deployedMyMarketPlaceContract.buySale(100)).to.be.revertedWith('Invalid saleId')
+    });
+
+    it("canceSale fails if saleId does not exist", async function() {
+        expect(deployedMyMarketPlaceContract.canceSale(100)).to.be.revertedWith('Invalid saleId')
+    });
+
     it("getSale fails if saleId does not exist", async function() {
         expect(deployedMyMarketPlaceContract.getSale(100)).to.be.revertedWith('Invalid saleId')
     });
