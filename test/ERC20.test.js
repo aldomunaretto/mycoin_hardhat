@@ -96,4 +96,26 @@ describe("ERC20 Test Suite", function(){
         ).to.be.revertedWith('Account is not allowed')
     })
 
+    it("Check switcherAccount if account is blacklisted", async function(){
+        //comprobar el estado inicial signer
+        const status = await deployedERC20Contract.blacklist(signer.address)
+        expect(status).to.be.true
+        //cambiar el estado del signer
+        await deployedERC20Contract.switcherAccount(signer.address)
+        //comprobar el estado final signer
+        const finalStatus = await deployedERC20Contract.blacklist(signer.address)
+        expect(finalStatus).to.be.false
+    })
+
+    it("Check setDecimals", async function(){
+        //comprobar el estado inicial
+        const decimals = await deployedERC20Contract.decimals()
+        expect(decimals).to.equal(2)
+        //cambiar el estado
+        await deployedERC20Contract.setDecimals(3)
+        //comprobar el estado final
+        const finalDecimals = await deployedERC20Contract.decimals()
+        expect(finalDecimals).to.equal(3)
+    })
+
 }) 
