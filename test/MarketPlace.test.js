@@ -14,27 +14,27 @@ describe("MyMarketPlace Test Suite", function () {
         const MyCoinContract = await ethers.getContractFactory("MyCoin")
         deployedMyCoinContract = await MyCoinContract.deploy(5000,2)
         await deployedMyCoinContract.waitForDeployment()
-        console.log(deployedMyCoinContract.target)
+        // console.log(deployedMyCoinContract.target)
     })
 
     it("Deploy MyNFTCollection Contract", async function(){
         const MyNFTCollectionContract = await ethers.getContractFactory("MyNFTCollection")
         deployedMyNFTCollectionContract = await MyNFTCollectionContract.deploy("MyKeepCodingNFT","KCNFT")
         await deployedMyNFTCollectionContract.waitForDeployment()
-        console.log(deployedMyNFTCollectionContract.target)
+        // console.log(deployedMyNFTCollectionContract.target)
     })
 
     it("Deploy MyMarketPlace Contract", async function(){
         const MyMarketPlaceContract = await ethers.getContractFactory("MyMarketPlace")
         deployedMyMarketPlaceContract = await MyMarketPlaceContract.deploy(deployedMyCoinContract.target,deployedMyNFTCollectionContract.target)
         await deployedMyMarketPlaceContract.waitForDeployment()
-        console.log(deployedMyMarketPlaceContract.target)
+        // console.log(deployedMyMarketPlaceContract.target)
     })
 
     it("Get Signers", async function(){
         [signer,account1] = await ethers.getSigners()
-        console.log(signer.address)
-        console.log(account1.address)
+        // console.log(signer.address)
+        // console.log(account1.address)
     })
 
     it("Contracts are deployed", async function() {
