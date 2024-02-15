@@ -1,15 +1,13 @@
-// IMPORTANE
-// Para la resolucion de la practica es necesario utilizar la funcion transferFrom tanto del ERC20 como del ERC721.
-// Porque quien va a realizar las llamas de transferencia (transferFrom) va a ser el contrato del MarketPlace
-// Por este motivo cuando desarrolleis los test primero teneis que hacer una llamada al metodo approve para autorizar el contrato de MarketPlace a transferir los tokens ERC20 y ERC721.
-
 const { expect } = require("chai");
 
+// Define el conjunto de pruebas para el MarketPlace.
 describe("MyMarketPlace Test Suite", function () {
 
+    // Variables globales para almacenar las instancias de los contratos desplegados y cuentas de usuario.
     let deployedMyCoinContract, deployedMyNFTCollectionContract, deployedMyMarketPlaceContract;
     let signer, account1;
 
+    // Despliegue del contrato MyCoin y espera a que se complete el despliegue.
     it("Deploy MyCoin Contract", async function(){
         const MyCoinContract = await ethers.getContractFactory("MyCoin")
         deployedMyCoinContract = await MyCoinContract.deploy(5000,2)
@@ -17,6 +15,7 @@ describe("MyMarketPlace Test Suite", function () {
         // console.log(deployedMyCoinContract.target)
     })
 
+    // Despliegue del contrato MyNFTCollection y espera a que se complete el despliegue.
     it("Deploy MyNFTCollection Contract", async function(){
         const MyNFTCollectionContract = await ethers.getContractFactory("MyNFTCollection")
         deployedMyNFTCollectionContract = await MyNFTCollectionContract.deploy("MyKeepCodingNFT","KCNFT")
@@ -24,6 +23,7 @@ describe("MyMarketPlace Test Suite", function () {
         // console.log(deployedMyNFTCollectionContract.target)
     })
 
+    // Despliegue del contrato MyMarketPlace y espera a que se complete el despliegue.
     it("Deploy MyMarketPlace Contract", async function(){
         const MyMarketPlaceContract = await ethers.getContractFactory("MyMarketPlace")
         deployedMyMarketPlaceContract = await MyMarketPlaceContract.deploy(deployedMyCoinContract.target,deployedMyNFTCollectionContract.target)
@@ -31,18 +31,31 @@ describe("MyMarketPlace Test Suite", function () {
         // console.log(deployedMyMarketPlaceContract.target)
     })
 
+    // Obtenemos las cuentas de usuario con las que se ejecutran las pruebas.
     it("Get Signers", async function(){
         [signer,account1] = await ethers.getSigners()
         // console.log(signer.address)
         // console.log(account1.address)
     })
 
+    // Verificación de que los contratos se han desplegado correctamente.
     it("Contracts are deployed", async function() {
         expect(deployedMyCoinContract.target).to.not.be.undefined
         expect(deployedMyNFTCollectionContract.target).to.not.be.undefined
         expect(deployedMyMarketPlaceContract.target).to.not.be.undefined
     })
 
+    // Verificación de que el contrato MyCoin se ha desplegado con los valores iniciales correctos.
+    it("Check MyCoin initial values", async function() {
+        let balanceSigner = await deployedMyCoinContract.getBalance(signer.address)
+        expect(balanceSigner).to.equal(5000)
+        let balanceAccount1 = await deployedMyCoinContract.getBalance(account1.address)
+        expect(balanceAccount1).to.equal(0)
+        let allowance = await deployedMyCoinContract.allowance(signer.address,deployedMyMarketPlaceContract.target)
+        expect(allowance).to.equal(0)
+    });
+
+     // Mintear un nuevo token NFT y verificar la propiedad del mismo.
     it("Mint new MyKeepCodingNFT token and check ownership", async function() {
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -51,7 +64,8 @@ describe("MyMarketPlace Test Suite", function () {
         expect(owner).to.equal(account1.address)
     })
 
-    it("Check createSale transfer ownership to contract", async function() {
+    // Verificar que la función createSale transfiera la propiedad del NFT al contrato de MyMarketPlace.
+    it("Check createSale transfer ownership to MyMarketPlace contract", async function() {
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
         let owner = await deployedMyNFTCollectionContract.ownerOf(tokenId)
@@ -62,7 +76,8 @@ describe("MyMarketPlace Test Suite", function () {
         expect(newOwner).to.equal(deployedMyMarketPlaceContract.target)
     });
 
-    it("Create sale can only be called by the token's owner", async function() {
+    // Verificar que solo el propietario del token pueda llamar a createSale.
+    it("createSale function can only be called by the token's owner", async function() {
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
         let owner = await deployedMyNFTCollectionContract.ownerOf(tokenId)
@@ -70,6 +85,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(deployedMyMarketPlaceContract.connect(signer).createSale(tokenId, 100)).to.be.revertedWith('You are not the owner of the token')
     });    
 
+    // Verificar que la función buySale transfiera el NFT al comprador y los MyCoins al vendedor.
     it("Check buySale transfer MyCoins to seller and the MyKeepCodingNFT to buyer", async function() {
         let oldBalanceSigner = await deployedMyCoinContract.getBalance(signer.address)
         expect(oldBalanceSigner).to.equal(5000)
@@ -94,6 +110,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(newBalanceAccount1).to.equal(100)
     });
 
+    // Verificar que la compra falle si el comprador no tiene suficientes MyCoins.
     it("buySale fails if the buyer does not have enough MyCoins", async function() {	
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -108,6 +125,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(deployedMyMarketPlaceContract.connect(signer).buySale(saleId)).to.be.revertedWith('Insufficient balance')
     });
 
+    // Verificar que la compra falle si el estado de la venta no es Open.
     it("buySale fails if status of the Sale is not Open", async function() {
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -121,6 +139,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(deployedMyMarketPlaceContract.connect(signer).buySale(saleId)).to.be.revertedWith('Sale is not open')
     });
 
+    // Verificar que la función canceSale devuelva el NFT al propietario anterior.
     it("Check canceSale returns the MyKeepCodingNFT to the previous owner", async function(){
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -137,6 +156,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(oldOwner).to.equal(account1.address)
     });
 
+    // Verificar que la función canceSale solo pueda ser llamada por el propietario de la venta.
     it("Check canceSale can only be called by the sale's owner", async function(){
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -153,6 +173,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(stillOwner).to.equal(deployedMyMarketPlaceContract.target)
     });
 
+    // Verificar que la función canceSale falle si el estado de la venta no es Open.
     it("canceSale fails if status of the Sale is not Open", async function() {
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -166,6 +187,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(deployedMyMarketPlaceContract.connect(account1).canceSale(saleId)).to.be.revertedWith('Sale is not open')
     });
 
+    // Verificar que la función getSale devuelva la información correcta de la venta.
     it("Check getSale returns correct information after using createSale function", async function() {
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -181,6 +203,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(sale[3]).to.equal(0)
     });
 
+    // Verificar que cambia el estado de la venta a Executed después de la función buySale.
     it("Check that status change to Executed after buySale function", async function() {
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -200,6 +223,7 @@ describe("MyMarketPlace Test Suite", function () {
         expect(sale[3]).to.equal(1)
     });
 
+    // Verificar que cambia el estado de la venta a Cancelled después de la función canceSale.
     it("Check that status change to Cancelled after canceSale function", async function() {
         await deployedMyNFTCollectionContract.connect(account1).mintNewToken()
         let tokenId = await deployedMyNFTCollectionContract.tokenIdCounter()
@@ -218,14 +242,17 @@ describe("MyMarketPlace Test Suite", function () {
         expect(sale[3]).to.equal(2)
     });
 
+    // Verificar que la función buySale falle si el saleId no existe.
     it("buySale fails if saleId does not exist", async function() {
         expect(deployedMyMarketPlaceContract.buySale(100)).to.be.revertedWith('Invalid saleId')
     });
 
+    // Verificar que la función canceSale falle si el saleId no existe.
     it("canceSale fails if saleId does not exist", async function() {
         expect(deployedMyMarketPlaceContract.canceSale(100)).to.be.revertedWith('Invalid saleId')
     });
 
+    // Verificar que la función getSale falle si el saleId no existe.
     it("getSale fails if saleId does not exist", async function() {
         expect(deployedMyMarketPlaceContract.getSale(100)).to.be.revertedWith('Invalid saleId')
     });
