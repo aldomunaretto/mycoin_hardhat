@@ -1,6 +1,6 @@
 const { expect } = require("chai");
 
-// Define el conjunto de pruebas para el MarketPlace.
+// Define el conjunto de pruebas para el contrato MyMarketPlace.
 describe("MyMarketPlace Test Suite", function () {
 
     // Variables globales para almacenar las instancias de los contratos desplegados y cuentas de usuario.
@@ -9,39 +9,46 @@ describe("MyMarketPlace Test Suite", function () {
 
     // Despliegue del contrato MyCoin y espera a que se complete el despliegue.
     it("Deploy MyCoin Contract", async function(){
+        // Obtenemos el contrato MyCoin.
         const MyCoinContract = await ethers.getContractFactory("MyCoin")
+        // Desplegamos el contrato con 5000 MyCoins y 2 decimales.
         deployedMyCoinContract = await MyCoinContract.deploy(5000,2)
+        // Esperamos a que se complete el despliegue.
         await deployedMyCoinContract.waitForDeployment()
-        // console.log(deployedMyCoinContract.target)
     })
 
     // Despliegue del contrato MyNFTCollection y espera a que se complete el despliegue.
     it("Deploy MyNFTCollection Contract", async function(){
+        // Obtenemos el contrato MyNFTCollection.
         const MyNFTCollectionContract = await ethers.getContractFactory("MyNFTCollection")
+        // Desplegamos el contrato con el nombre "MyKeepCodingNFT" y el símbolo "KCNFT".
         deployedMyNFTCollectionContract = await MyNFTCollectionContract.deploy("MyKeepCodingNFT","KCNFT")
+        // Esperamos a que se complete el despliegue.
         await deployedMyNFTCollectionContract.waitForDeployment()
-        // console.log(deployedMyNFTCollectionContract.target)
     })
 
     // Despliegue del contrato MyMarketPlace y espera a que se complete el despliegue.
     it("Deploy MyMarketPlace Contract", async function(){
+        // Obtenemos el contrato MyMarketPlace.
         const MyMarketPlaceContract = await ethers.getContractFactory("MyMarketPlace")
+        // Desplegamos el contrato MyMarketPace con las direcciones de los contratos MyCoin y MyNFTCollection.
         deployedMyMarketPlaceContract = await MyMarketPlaceContract.deploy(deployedMyCoinContract.target,deployedMyNFTCollectionContract.target)
+        // Esperamos a que se complete el despliegue.
         await deployedMyMarketPlaceContract.waitForDeployment()
-        // console.log(deployedMyMarketPlaceContract.target)
     })
 
     // Obtenemos las cuentas de usuario con las que se ejecutran las pruebas.
     it("Get Signers", async function(){
         [signer,account1] = await ethers.getSigners()
-        // console.log(signer.address)
-        // console.log(account1.address)
     })
 
     // Verificación de que los contratos se han desplegado correctamente.
     it("Contracts are deployed", async function() {
+        // Verificamos que la dirección del contrato MyCoin no sean undefined.
         expect(deployedMyCoinContract.target).to.not.be.undefined
+        // Verificamos que la dirección del contrato MyNFTCollection no sean undefined.
         expect(deployedMyNFTCollectionContract.target).to.not.be.undefined
+        // Verificamos que la dirección del contrato MyMarketPlace no sean undefined.
         expect(deployedMyMarketPlaceContract.target).to.not.be.undefined
     })
 
@@ -159,6 +166,9 @@ describe("MyMarketPlace Test Suite", function () {
         await deployedMyNFTCollectionContract.connect(account1).approve(deployedMyMarketPlaceContract.target, tokenId)
         // Creamos una venta del token y verificamos que el nuevo propietario sea el contrato MyMarketPlace.
         await deployedMyMarketPlaceContract.connect(account1).createSale(tokenId, 100)
+        let currentOwner = await deployedMyNFTCollectionContract.ownerOf(tokenId)
+        expect(currentOwner).to.equal(deployedMyMarketPlaceContract.target)
+        // Aprobamos al contrato MyMarketPlace para que pueda transferir los MyCoins.
         await deployedMyCoinContract.connect(signer).approve(deployedMyMarketPlaceContract.target, 100)
         // Obtenemos el id de la venta.
         let saleId = await deployedMyMarketPlaceContract.saleIdCounter()
