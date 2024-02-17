@@ -7,7 +7,7 @@ let contractAddress
 // Despliegue del contrato MyMarketPlace y espera a que se complete el despliegue.
 // Requiere como parámetros las direcciones de los contratos MyCoin y MyNFTCollection.
 async function deploy(CoinContractAddress,NFTContractAddress){
-    console.log("MarketPlace deployment has just started...")
+    console.log("MyMarketPlace deployment has just started...")
     // Obtenemos el contrato MyMarketPlace.
     const MarketPlaceContract = await ethers.getContractFactory("MyMarketPlace")
     // Desplegamos el contrato utilizando como parámetros las direcciones de los contratos MyCoin y MyNFTCollection.
@@ -16,7 +16,7 @@ async function deploy(CoinContractAddress,NFTContractAddress){
     await deployedContract.waitForDeployment()
     // Obtenemos la dirección del contrato desplegado.
     contractAddress = deployedContract.target
-    console.log("...MarketPlace contract has been deployed to: " + contractAddress)
+    console.log("...MyMarketPlace contract has been deployed to: " + contractAddress)
 }
 
 async function verify(){}

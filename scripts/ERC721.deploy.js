@@ -6,7 +6,7 @@ let contractAddress
 
 // Despliegue del contrato MyNFTCollection y espera a que se complete el despliegue.
 async function deploy(){
-    console.log("ERC721 deployment has just started...")
+    console.log("MyNFTCollection deployment has just started...")
     // Obtenemos el contrato MyNFTCollection.
     const ERC721Contract = await ethers.getContractFactory("MyNFTCollection")
     // Desplegamos el contrato con el nombre "MyKeepCodingNFT" y el símbolo "KCNFT".
@@ -15,7 +15,7 @@ async function deploy(){
     await deployedContract.waitForDeployment()
     // Obtenemos la dirección del contrato desplegado.
     contractAddress = deployedContract.target
-    console.log("...ERC721 constract has been deployed to: " + contractAddress)
+    console.log("...MyNFTCollection contract has been deployed to: " + contractAddress)
 }
 
 async function verify(){}
