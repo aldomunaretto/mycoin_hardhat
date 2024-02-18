@@ -25,9 +25,9 @@ let contractReadMyNFTCollection, contractWriteMyNFTCollection
 let contractReadMyMarketPlace, contractWriteMyMarketPlace
 
 // Declaración de variables para las direcciones de los contratos de MyCoin, MyNFTCollection y MyMarketPlace.
-let MyCoincontractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3"
-let MyNFTCollectioncontractAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
-let MyMarketPlacecontractAddress = "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+let MyCoincontractAddress = "0x71Ae3E05d9895a95Fb7ca19Ff0B6Bf8576890314"
+let MyNFTCollectioncontractAddress = "0xE862E4662E78bE181d88507F539c332113C5d997"
+let MyMarketPlacecontractAddress = "0x1c508FF6eE24E649edDA698E3A9e39a1AA258d5a"
 
 /**
  * -----------------------------------------------------------------------------------------------------
