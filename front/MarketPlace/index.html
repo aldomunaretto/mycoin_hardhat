@@ -11,5 +11,42 @@
 </head>
 <body>
     <input type="button" id="connectMetamaskBtn" value="Connect Metamaks">
+    <div>
+        <h2>MyCoin App</h2>
+        <div id="myWalletAddress"></div>
+        <div id="myCoinBalance"></div>
+    </div>
+    <div>
+        <h2>MyNFTCollection App</h2>
+        <input type="button" id="mintNewTokenBtn" value="Mint New Token">
+        <div id="myNFTBalance"></div>
+    </div>
+    <div>
+        <h2>MyMarketPlace App</h2>
+        <ul style = "list-style: none;">
+            <li style="margin-bottom: 16px;">
+                <input type="button" id="createSaleBtn" value="Create Sale">
+                <input type="number" id="tokenId" placeholder="Enter TokenId">
+                <input type="number" id="salesPrice" placeholder="Enter Price">
+            </li>
+            <li style="margin-bottom: 16px;">
+                <input type="button" id="buySaleBtn" value="Buy Sale">
+                <input type="number" id="saleIdToBuy" placeholder="Enter SaleId">
+            </li>
+            <li style="margin-bottom: 16px;">
+                <input type="button" id="cancelSaleBtn" value="Cancel Sale">
+                <input type="number" id="saleIdToCancel" placeholder="Enter SaleId">    
+            </li>
+            <li style="margin-bottom: 16px;">
+                <input type="button" id="getSaleBtn" value="Get Sale's Info">
+                <input type="number" id="saleId" placeholder="Enter SaleId">  
+                <div id="saleOwner"></div>
+                <div id="saleTokenId"></div> 
+                <div id="salePrice"></div> 
+                <div id="saleStatus"></div> 
+                <div id="error-message"></div>
+            </li>
+        </ul>
+    </div>
 </body>
 </html>
