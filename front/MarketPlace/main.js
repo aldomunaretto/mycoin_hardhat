@@ -98,16 +98,16 @@ const getNetwork = async () => {
 const getMyCoinBalance = async () => {
     contractReadMyCoin = new ethers.Contract(MyCoincontractAddress,MyCoinContractABIFormatted,provider)
     const balance = await contractReadMyCoin.getBalance(address)
-    console.log(balance)
+    // console.log(balance)
 
     const decimals = await contractReadMyCoin.decimals()
     const formattedBalance = ethers.utils.formatUnits(balance,decimals)
 
-    console.log(formattedBalance)
+    // console.log(formattedBalance)
 
     document.getElementById("myWalletAddress").textContent = 'My wallet address is  '+ address;
     document.getElementById("myCoinBalance").textContent = 'MyCoin Balance is ' + formattedBalance;
-    return formattedBalance
+    // return formattedBalance
 
 }
 
@@ -141,14 +141,22 @@ const tokensOfOwner = async () => {
     }
 }
 
-const listSales = async () => {
+const listOpenSalesTokens = async () => {
+    let openSalesTokens = []
     contractReadMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,provider)
     const sales = await contractReadMyMarketPlace.saleIdCounter()
     const saleCounter = ethers.utils.formatUnits(sales,0)
-    console.log(saleCounter)
+    // console.log(saleCounter)
     for (let i = 1; i <= saleCounter; i++) {
-        const sale = await contractReadMyMarketPlace.getSale(i)
-        console.log(sale)
+        const sales = await contractReadMyMarketPlace.getSale(i)
+        if (sales[3] == 0) {
+            openSalesTokens.push(sales[1])
+        }
+    }
+    if (openSalesTokens.length > 0) {
+        document.getElementById("openSales").textContent = 'The following TokenId are available for sale: ' + openSalesTokens.sort().join(', ')
+    } else {
+        document.getElementById("openSales").textContent = "There's no tokens available for sale"
     }
 }
 
@@ -168,41 +176,17 @@ const createSale = async () => {
                 tokenIdInput,
                 priceInput
             )
+            const decimals = await contractReadMyCoin.decimals()
+            const formattedpriceInput = ethers.utils.formatUnits(priceInput,decimals)
             await tx.wait()
             // console.log(tx)
             let saleId = await contractReadMyMarketPlace.saleIdCounter()
-            alert("You have successfully created a Sale with SaleId: " + saleId + " and TokenId: " + tokenIdInput + " and Price: " + priceInput + " MyCoin")
+            alert("You have successfully created a Sale with SaleId: " + saleId + " and TokenId: " + tokenIdInput + " and Price: " + formattedpriceInput + " MyCoin")
         } catch (error) {
             console.error('Error capturado:', error);
             document.getElementById('create-error-message').textContent = error.data.message
           }
     }
-    // contractWriteMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,signer)
-    // contractWriteMyNFTCollection = new ethers.Contract(MyNFTCollectioncontractAddress,MyNFTCollectionContractABIFormatted,signer)
-    // // const decimals = await contractWriteMyMarketPlace.decimals()
-    // // const price = ethers.utils.parseUnits(priceInput,decimals)
-    // try {
-    //     const approved = await contractWriteMyNFTCollection.approve(MyMarketPlacecontractAddress,tokenIdInput)
-    //     const tx = await contractWriteMyMarketPlace.createSale(
-    //         tokenIdInput,
-    //         priceInput
-    //     )
-    //     await tx.wait()
-    //     console.log(tx)
-    //     alert("Ha creado una venta (Sale) exitosamente")
-    // } catch (error) {
-    //     console.error('Error capturado:', error);
-    //     document.getElementById('create-error-message').textContent = error.data.message
-    //   }
-
-    // const approved = await contractWriteMyNFTCollection.approve(MyMarketPlacecontractAddress,tokenIdInput)
-    // const tx = await contractWriteMyMarketPlace.createSale(
-    //     tokenIdInput,
-    //     priceInput
-    // )
-    // await tx.wait()
-    // console.log(tx)
-    // alert("Ha creado una venta (Sale) exitosamente")
 }
 
 const buySale = async () => {
@@ -217,7 +201,7 @@ const buySale = async () => {
         const tx = await contractWriteMyMarketPlace.buySale(saleIdInput)
         await tx.wait()
         console.log(tx)
-        alert("Ha comprado un token exitosamente")
+        alert("You have successfully purchased a token from the sale with saleId: " + saleIdInput + "and with the tokenId: " + sale[1])
     }
 }
 
@@ -239,12 +223,15 @@ const getSale = async () => {
     await resetGetSaleMessages()
     const saleIdInput = document.getElementById("saleId").value;
     contractReadMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,provider)
+
     try {
         const sale = await contractReadMyMarketPlace.getSale(saleIdInput)
         console.log(sale)
+        let decimals = await contractReadMyCoin.decimals()
+        let formattedprice = ethers.utils.formatUnits(sale[2],decimals)
         document.getElementById("saleOwner").textContent = "Sale's Owner : " + sale[0]
         document.getElementById("saleTokenId").textContent = "Token's Id : " + sale[1]
-        document.getElementById("salePrice").textContent = "Price : " + sale[2]
+        document.getElementById("salePrice").textContent = "Price : " + formattedprice + " MyCoin"
         if (sale[3] == 0) {
             statusMessage = "Open"
         } else if (sale[3] == 1) {
@@ -287,7 +274,7 @@ metamaskButton.addEventListener("click", async () =>{
     await getMyCoinBalance()
     await tokensOfOwner()
     await enableAllButtons()
-    await listSales()
+    await listOpenSalesTokens()
     await resetGetSaleMessages()
 })
 
@@ -296,6 +283,7 @@ mintNewTokenButton.addEventListener("click", async () =>{
     console.log("mintNewTokenButton")
     await mintNewToken()
     await tokensOfOwner()
+    await resetGetSaleMessages()
 })
 
 const createSaleButton = document.getElementById("createSaleBtn")
@@ -303,6 +291,8 @@ createSaleButton.addEventListener("click", async () =>{
     console.log("createSaleButton")
     await createSale()
     await tokensOfOwner()
+    await listOpenSalesTokens()
+    await resetGetSaleMessages()
 })
 
 const buySaleButton = document.getElementById("buySaleBtn")
@@ -310,6 +300,8 @@ buySaleButton.addEventListener("click", async () =>{
     console.log("buySaleButton")
     await buySale()
     await tokensOfOwner()
+    await listOpenSalesTokens()
+    await resetGetSaleMessages()
 })
 
 const cancelSaleButton = document.getElementById("cancelSaleBtn")
@@ -317,6 +309,8 @@ cancelSaleButton.addEventListener("click", async () =>{
     console.log("cancelSaleButton")
     await cancelSale()
     await tokensOfOwner()
+    await listOpenSalesTokens()
+    await resetGetSaleMessages()
 })
 
 const getSaleButton = document.getElementById("getSaleBtn")
