@@ -45,7 +45,7 @@ const getNetwork = async () => {
 // 2- Contract Address, porque una referencia de donde atacar en la blockchain
 // 3- Contract ABI (Application Binary Interface), porque necesitamos lo que puede hacer el contrato
 
-let contractAddress = "0xe745d1eDdB571C3FDd6a73477c7f08DB3Bf2dF23"
+let contractAddress = "0x71Ae3E05d9895a95Fb7ca19Ff0B6Bf8576890314"
 
 import ContractABI from "../../artifacts/contracts/ERC20/MyCoin.sol/MyCoin.json" assert {type: "json"}
 const ContractInterface = new ethers.utils.Interface(ContractABI.abi)
@@ -61,24 +61,38 @@ const getMyCoinBalance = async () => {
 
     console.log(formattedBalance)
 
+    document.getElementById("myWalletAddress").textContent = 'My wallet address is  '+ address;
+    document.getElementById("myCoinBalance").textContent = 'MyCoin Balance is ' + formattedBalance;
+    return formattedBalance
+
 }
 
 const trasnferMyCoin = async () => {
+    const walletInput = document.getElementById("toWalletAddress").value;
+    const amountInput = document.getElementById("transferAmount").value;
     contractWrite = new ethers.Contract(contractAddress,ContractABIFormatted,signer)
     const decimals = await contractWrite.decimals()
-    const amount = ethers.utils.parseUnits("5.0",decimals)
+    const amount = ethers.utils.parseUnits(amountInput,decimals)
     const tx = await contractWrite.doTransfer(
-        "0x9248a1D30c120c1da0F7bf51B6AC401AF81a7f0E",
+        walletInput,
         amount
     )
     await tx.wait()
     console.log(tx)
+    contractRead = new ethers.Contract(contractAddress,ContractABIFormatted,provider)
+    let receiverBalance = await contractRead.getBalance(walletInput)
+    let formattedBalance = ethers.utils.formatUnits(receiverBalance,decimals)
+    console.log(formattedBalance)
     alert("Transaccion Realizada Correctamente")
 }
 
 const transferMyCoin = document.getElementById("transferMyCoin")
 transferMyCoin.addEventListener("click", async () => {
     await trasnferMyCoin()
+    document.getElementById("toWalletAddress").value = "";
+    document.getElementById("transferAmount").value = "";
+    await getMyCoinBalance()
+    
 })
 
 const metamaskButton = document.getElementById("metamaskButton")

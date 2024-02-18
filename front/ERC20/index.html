@@ -9,11 +9,15 @@
         type="application/javascript"></script>
     <script defer type="module" src='main.js'></script>
 </head>
-<body>
+<body style="font-family: Arial, Helvetica, sans-serif">
     <input type="button" id="metamaskButton" value="Connect Metamask">
 
     <div>
-        <h2>Transferir MyCoin</h2>
+        <h2>Transfer MyCoin App</h2>
+        <div id="myWalletAddress"></div>
+        <div id="myCoinBalance"></div>
+        <input type="text" id="toWalletAddress" style="width: 400px; margin-top: 24px;" placeholder="Address to send MyCoins">
+        <input type="number" id="transferAmount" placeholder="Transfer Amount">
         <input type="button" id="transferMyCoin" value="Transfer MyCoin">
     </div>
 </body>
