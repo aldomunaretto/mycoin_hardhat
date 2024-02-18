@@ -9,42 +9,67 @@
         type="application/javascript"></script>
     <script defer type="module" src='main.js'></script>
 </head>
-<body>
+<body style="font-family: Arial, Helvetica, sans-serif">
     <input type="button" id="connectMetamaskBtn" value="Connect Metamaks">
     <div>
         <h2>MyCoin App</h2>
-        <div id="myWalletAddress"></div>
-        <div id="myCoinBalance"></div>
+        <ul style = "list-style: none;">
+            <li style="margin-bottom: 16px;">
+                <div id="myWalletAddress"></div>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <div id="myCoinBalance"></div>
+            </li>
+        </ul>
+        
+        
     </div>
     <div>
         <h2>MyNFTCollection App</h2>
-        <input type="button" id="mintNewTokenBtn" value="Mint New Token">
-        <div id="myNFTBalance"></div>
+        <ul style = "list-style: none;">
+            <li style="margin-bottom: 16px;">
+                <input type="button" id="mintNewTokenBtn" value="Mint New Token" disabled>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <div id="myNFTBalance"></div>
+            </li>       
+        </ul>
     </div>
     <div>
         <h2>MyMarketPlace App</h2>
         <ul style = "list-style: none;">
             <li style="margin-bottom: 16px;">
-                <input type="button" id="createSaleBtn" value="Create Sale">
-                <input type="number" id="tokenId" placeholder="Enter TokenId">
-                <input type="number" id="salesPrice" placeholder="Enter Price">
+                <input type="button" id="createSaleBtn" value="Create Sale" disabled>
+                <input type="number" id="tokenId" placeholder="Enter TokenId" disabled>
+                <input type="number" id="salesPrice" placeholder="Enter Price" disabled>
+                <div id="create-error-message"></div>
             </li>
             <li style="margin-bottom: 16px;">
-                <input type="button" id="buySaleBtn" value="Buy Sale">
-                <input type="number" id="saleIdToBuy" placeholder="Enter SaleId">
+                <input type="button" id="buySaleBtn" value="Buy Sale" disabled>
+                <input type="number" id="saleIdToBuy" placeholder="Enter SaleId" disabled>
             </li>
             <li style="margin-bottom: 16px;">
-                <input type="button" id="cancelSaleBtn" value="Cancel Sale">
-                <input type="number" id="saleIdToCancel" placeholder="Enter SaleId">    
+                <input type="button" id="cancelSaleBtn" value="Cancel Sale" disabled>
+                <input type="number" id="saleIdToCancel" placeholder="Enter SaleId" disabled>    
             </li>
             <li style="margin-bottom: 16px;">
-                <input type="button" id="getSaleBtn" value="Get Sale's Info">
-                <input type="number" id="saleId" placeholder="Enter SaleId">  
+                <input type="button" id="getSaleBtn" value="Get Sale's Info" disabled>
+                <input type="number" id="saleId" placeholder="Enter SaleId" disabled>
+            </li>
+            <li style="margin-bottom: 16px;">  
                 <div id="saleOwner"></div>
+            </li>
+            <li style="margin-bottom: 16px;">
                 <div id="saleTokenId"></div> 
+            </li>
+            <li style="margin-bottom: 16px;">
                 <div id="salePrice"></div> 
+            </li>
+            <li style="margin-bottom: 16px;">
                 <div id="saleStatus"></div> 
-                <div id="error-message"></div>
+            </li>
+            <li style="margin-bottom: 16px;">
+                <div id="get-error-message"></div>
             </li>
         </ul>
     </div>

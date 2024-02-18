@@ -65,6 +65,14 @@ const connectMetamask = async () => {
     console.log(address)
 }
 
+const enableAllButtons = async () => {
+    const inputs = document.getElementsByTagName("input")
+    for (let input of inputs) {
+        input.disabled = false
+    }
+}    
+
+
 const getNativeBalance = async () => {
     console.log("")
     console.log("getNativeBalance")
@@ -107,58 +115,123 @@ const mintNewToken = async () => {
     contractWriteMyNFTCollection = new ethers.Contract(MyNFTCollectioncontractAddress,MyNFTCollectionContractABIFormatted,signer)
     const tx = await contractWriteMyNFTCollection.mintNewToken()
     await tx.wait()
-    console.log(tx)
-    // tokenId = tx.events[0].args[2]
-    // await contractWriteMyNFTCollection.approve(MyMarketPlacecontractAddress,tokenId)
-    // const approved = await contractWriteMyNFTCollection.getApproved(tokenId)
-    // console.log(approved)
-    alert("Ha creado un Token exitosamente")
+    // console.log(tx)
+    contractReadMyNFTCollection = new ethers.Contract(MyNFTCollectioncontractAddress,MyNFTCollectionContractABIFormatted,provider)
+    const tokenCounter = await contractReadMyNFTCollection.tokenIdCounter()
+    alert("You have successfully minted a new NFT Token with TokenId: " + tokenCounter)
 }
 
 const tokensOfOwner = async () => {
+    let tokens = []
     contractReadMyNFTCollection = new ethers.Contract(MyNFTCollectioncontractAddress,MyNFTCollectionContractABIFormatted,provider)
-    const tokens = await contractReadMyNFTCollection.balanceOf(address)
-    console.log(tokens)
-    document.getElementById("myNFTBalance").textContent = 'You own : ' + tokens + ' token.';
-    return tokens
+    const tokenCounter = await contractReadMyNFTCollection.tokenIdCounter()
+    const tokenIdCounter = ethers.utils.formatUnits(tokenCounter,0)
+    // console.log(tokenIdCounter)
+    for (let i = 1; i <= tokenIdCounter; i++) {
+        const tokenOwner = await contractReadMyNFTCollection.ownerOfToken(i)
+        if (tokenOwner == address) {
+            tokens.push(i)
+        }
+    }
+    // console.log(tokens)
+    if (tokens.length > 0) {
+        document.getElementById("myNFTBalance").textContent = 'You own the following tokens: ' + tokens.join(', ')
+    } else {
+        document.getElementById("myNFTBalance").textContent = "You don't own tokens."
+    }
+}
+
+const listSales = async () => {
+    contractReadMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,provider)
+    const sales = await contractReadMyMarketPlace.saleIdCounter()
+    const saleCounter = ethers.utils.formatUnits(sales,0)
+    console.log(saleCounter)
+    for (let i = 1; i <= saleCounter; i++) {
+        const sale = await contractReadMyMarketPlace.getSale(i)
+        console.log(sale)
+    }
 }
 
 const createSale = async () => {
-    const tokenIdInput = document.getElementById("tokenId").value;
-    const priceInput = document.getElementById("salesPrice").value;
-    contractWriteMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,signer)
-    contractWriteMyNFTCollection = new ethers.Contract(MyNFTCollectioncontractAddress,MyNFTCollectionContractABIFormatted,signer)
-    // const decimals = await contractWriteMyMarketPlace.decimals()
-    // const price = ethers.utils.parseUnits(priceInput,decimals)
-    const approved = await contractWriteMyNFTCollection.approve(MyMarketPlacecontractAddress,tokenIdInput)
-    const tx = await contractWriteMyMarketPlace.createSale(
-        tokenIdInput,
-        priceInput
-    )
-    await tx.wait()
-    console.log(tx)
-    alert("Ha creado una venta (Sale) exitosamente")
+    const tokenIdInput = document.getElementById("tokenId").value
+    const priceInput = document.getElementById("salesPrice").value
+    if (!tokenIdInput) {
+        alert("TokenId cannot be empty")
+    } else if (!priceInput) {
+        alert("Price cannot be empty")
+    } else {
+        contractWriteMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,signer)
+        contractWriteMyNFTCollection = new ethers.Contract(MyNFTCollectioncontractAddress,MyNFTCollectionContractABIFormatted,signer)
+        try {
+            await contractWriteMyNFTCollection.approve(MyMarketPlacecontractAddress,tokenIdInput)
+            const tx = await contractWriteMyMarketPlace.createSale(
+                tokenIdInput,
+                priceInput
+            )
+            await tx.wait()
+            // console.log(tx)
+            let saleId = await contractReadMyMarketPlace.saleIdCounter()
+            alert("You have successfully created a Sale with SaleId: " + saleId + " and TokenId: " + tokenIdInput + " and Price: " + priceInput + " MyCoin")
+        } catch (error) {
+            console.error('Error capturado:', error);
+            document.getElementById('create-error-message').textContent = error.data.message
+          }
+    }
+    // contractWriteMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,signer)
+    // contractWriteMyNFTCollection = new ethers.Contract(MyNFTCollectioncontractAddress,MyNFTCollectionContractABIFormatted,signer)
+    // // const decimals = await contractWriteMyMarketPlace.decimals()
+    // // const price = ethers.utils.parseUnits(priceInput,decimals)
+    // try {
+    //     const approved = await contractWriteMyNFTCollection.approve(MyMarketPlacecontractAddress,tokenIdInput)
+    //     const tx = await contractWriteMyMarketPlace.createSale(
+    //         tokenIdInput,
+    //         priceInput
+    //     )
+    //     await tx.wait()
+    //     console.log(tx)
+    //     alert("Ha creado una venta (Sale) exitosamente")
+    // } catch (error) {
+    //     console.error('Error capturado:', error);
+    //     document.getElementById('create-error-message').textContent = error.data.message
+    //   }
+
+    // const approved = await contractWriteMyNFTCollection.approve(MyMarketPlacecontractAddress,tokenIdInput)
+    // const tx = await contractWriteMyMarketPlace.createSale(
+    //     tokenIdInput,
+    //     priceInput
+    // )
+    // await tx.wait()
+    // console.log(tx)
+    // alert("Ha creado una venta (Sale) exitosamente")
 }
 
 const buySale = async () => {
-    const saleIdInput = document.getElementById("saleId").value;
-    const sale = await contractReadMyMarketPlace.getSale(saleIdInput)
-    contractWriteMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,signer)
-    contractWriteMyCoin = new ethers.Contract(MyCoincontractAddress,MyCoinContractABIFormatted,signer)
-    const approved = await contractWriteMyCoin.approve(MyMarketPlacecontractAddress,sale[2])
-    const tx = await contractWriteMyMarketPlace.buySale(saleIdInput)
-    await tx.wait()
-    console.log(tx)
-    alert("Ha comprado un token exitosamente")
+    const saleIdInput = document.getElementById("saleIdToBuy").value;
+    if (!saleIdInput) {
+        alert("SaleId cannot be empty")
+    } else {
+        const sale = await contractReadMyMarketPlace.getSale(saleIdInput)
+        contractWriteMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,signer)
+        contractWriteMyCoin = new ethers.Contract(MyCoincontractAddress,MyCoinContractABIFormatted,signer)
+        await contractWriteMyCoin.approve(MyMarketPlacecontractAddress,sale[2])
+        const tx = await contractWriteMyMarketPlace.buySale(saleIdInput)
+        await tx.wait()
+        console.log(tx)
+        alert("Ha comprado un token exitosamente")
+    }
 }
 
 const cancelSale = async () => {
-    const saleIdInput = document.getElementById("saleId").value;
-    contractWriteMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,signer)
-    const tx = await contractWriteMyMarketPlace.canceSale(saleIdInput)
-    await tx.wait()
-    console.log(tx)
-    alert("Ha cancelado la venta exitosamente")
+    const saleIdInput = document.getElementById("saleIdToCancel").value
+    if (!saleIdInput) {
+        alert("SaleId cannot be empty")
+    } else {
+        contractWriteMyMarketPlace = new ethers.Contract(MyMarketPlacecontractAddress,MyMarketPlaceContractABIFormatted,signer)
+        const tx = await contractWriteMyMarketPlace.canceSale(saleIdInput)
+        await tx.wait()
+        console.log(tx)
+        alert("You have successfully canceled the sale with SaleId: " + saleIdInput)
+    }
 }
 
 const getSale = async () => {
@@ -180,12 +253,15 @@ const getSale = async () => {
             statusMessage = "Cancelled"
         }
         document.getElementById("saleStatus").textContent = "Status : " + statusMessage
-        return sale
     } catch (error) {
         console.error('Error capturado:', error);
-        document.getElementById('error-message').textContent = error.data.message
+        if (error.data.code == -32603) {
+            document.getElementById('get-error-message').textContent = "SaleId does not exist"
+        } else {
+        document.getElementById('get-error-message').textContent = error.data.message
       }
     }
+}
 
 const resetGetSaleMessages = async () => {
     // document.getElementById("saleId").value = ""
@@ -193,7 +269,7 @@ const resetGetSaleMessages = async () => {
     document.getElementById("saleTokenId").textContent = ""
     document.getElementById("salePrice").textContent = ""
     document.getElementById("saleStatus").textContent = ""
-    document.getElementById('error-message').textContent = ""
+    document.getElementById('get-error-message').textContent = ""
 }
 
 /**
@@ -210,6 +286,8 @@ metamaskButton.addEventListener("click", async () =>{
     await getNetwork()
     await getMyCoinBalance()
     await tokensOfOwner()
+    await enableAllButtons()
+    await listSales()
     await resetGetSaleMessages()
 })
 
@@ -217,24 +295,28 @@ const mintNewTokenButton = document.getElementById("mintNewTokenBtn")
 mintNewTokenButton.addEventListener("click", async () =>{
     console.log("mintNewTokenButton")
     await mintNewToken()
+    await tokensOfOwner()
 })
 
 const createSaleButton = document.getElementById("createSaleBtn")
 createSaleButton.addEventListener("click", async () =>{
     console.log("createSaleButton")
     await createSale()
+    await tokensOfOwner()
 })
 
 const buySaleButton = document.getElementById("buySaleBtn")
 buySaleButton.addEventListener("click", async () =>{
     console.log("buySaleButton")
     await buySale()
+    await tokensOfOwner()
 })
 
 const cancelSaleButton = document.getElementById("cancelSaleBtn")
 cancelSaleButton.addEventListener("click", async () =>{
     console.log("cancelSaleButton")
     await cancelSale()
+    await tokensOfOwner()
 })
 
 const getSaleButton = document.getElementById("getSaleBtn")
